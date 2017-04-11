@@ -1,0 +1,9 @@
+D:\Code\test_task\c_sh\test_task\test_task\bin\Debug\test_task.exe.config
+D:\Code\test_task\c_sh\test_task\test_task\bin\Debug\test_task.exe
+D:\Code\test_task\c_sh\test_task\test_task\bin\Debug\test_task.pdb
+D:\Code\test_task\c_sh\test_task\test_task\obj\Debug\test_task.csprojResolveAssemblyReference.cache
+D:\Code\test_task\c_sh\test_task\test_task\obj\Debug\test_task.exe
+D:\Code\test_task\c_sh\test_task\test_task\obj\Debug\test_task.pdb
+D:\Code\test_task_google_analitics\c_sh\test_task\test_task\bin\Debug\test_task.exe.config
+D:\Code\test_task_google_analitics\c_sh\test_task\test_task\obj\Debug\test_task.exe
+D:\Code\test_task_google_analitics\c_sh\test_task\test_task\obj\Debug\test_task.pdb
