@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+//using Excel;
 
 namespace test_task
 {
@@ -18,6 +19,9 @@ namespace test_task
 
     class Program
     {
+
+        const string input_file_name = "data.csv";
+        const string output_file_name = "output.csv";
 
         static bool get_end_of_cicle(string a)
         {
@@ -47,6 +51,7 @@ namespace test_task
 
         static void Main(string[] args)
         {
+
             string line = "";
             string buf_line = "";
 
@@ -57,10 +62,10 @@ namespace test_task
             List<sourse> sourses = new List<sourse> { };
 
             StreamReader file;
-
+         
             try
             {
-                file = new StreamReader("data.csv");
+                file = new StreamReader(input_file_name);
             }
             catch(FileNotFoundException)
             {
@@ -197,9 +202,27 @@ namespace test_task
 
             //outputStringMas[sourses.Count] = Convert.ToString(Math.Round(final_amount,2));
 
-            File.WriteAllLines("output.csv", outputStringMas);
+            File.WriteAllLines(output_file_name, outputStringMas);
 
             Console.WriteLine("{0:0.00}",final_amount);
+
+            Excel excel_file = new Excel();
+            excel_file.NewDocument();
+            excel_file.SetValue("A1", "Источник");
+            excel_file.SetValue("B1", "Сумма");
+
+            int j = 2;
+
+            foreach(sourse channel in sourses)
+            {
+                excel_file.SetValue("A" + j, channel.name);
+                excel_file.SetValue("B" + j, Convert.ToString(channel.amount));
+                j++;
+            }
+
+            excel_file.SaveDocument("output_excel");
+            excel_file.CloseDocument();
+
             //Console.WriteLine("{0:0.00}",final_amount_test);
 
             //sourses.ForEach(Console.WriteLine);
