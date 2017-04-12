@@ -28,21 +28,17 @@ namespace test_task
             {
                 a = a.Remove(1, a.Length - 1);
                 double dob = Convert.ToDouble(a);
-                //Console.WriteLine(amount);
             }
             catch (FormatException)
             {
-                //Console.WriteLine("Format err");
                 return true;
             }
             catch(InvalidCastException)
             {
-                //Console.WriteLine("char");
                 return true;
             }
             catch (OverflowException)
             {
-                //Console.WriteLine("Over");
                 return true;
             }
             return false;
@@ -98,31 +94,39 @@ namespace test_task
 
             while((line = file.ReadLine()) != null)
             {
-                for (int i = 0; i < sourses.Count; i++)
+                //проверка на нужность этой строчки
+                var match = Regex.Match(line, @"(display|cpm|banner)+|(cpc|ppc|paidsearch)+|(referral)+");
+                if (!match.Success)
                 {
-                    sourses[i].count = 0;
+                    continue;
+                }
+
+                foreach (sourse channel in sourses)
+                {
+                    channel.count = 0;
                 }
 
                 buf_line = line;
 
-                buf_line = buf_line.Replace("\"", "");
-
-                var match = Regex.Match(buf_line, @"()");
+                buf_line = buf_line.Replace("\\", "");
 
                 //считываем сумму для этой строчки
                 //var match = Regex.Match(buf_line, @"[0-9][0-9]+(?:\.[0-9]*)?");
-                
-                match = Regex.Match(buf_line, @"(?<=(\$)).*");
+                string amount_str;
+                match = Regex.Match(buf_line, @"(?<=(\"")).*");
                 if (match.Success)
                 {
-                    //Console.WriteLine(match.ToString());
+                    amount_str = match.ToString();
                 }
-                string amount_str = match.ToString();
-                //amount_str = amount_str.Replace(".", ",");
-                //amount_str = "1,5";
+                else
+                {
+                    continue;
+                }
 
-                amount_str = amount_str.Replace(",", System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator);
-                amount_str = amount_str.Replace(".", System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
+                amount_str = amount_str.Replace(" $\"", "");
+                amount_str = amount_str.Replace(",", System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
+                amount_str = amount_str.Replace(" ", System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator);
+                //amount_str = amount_str.Replace(",", System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator);
 
                 double amount = 0;
 
@@ -130,43 +134,50 @@ namespace test_task
                 {
                     amount = Convert.ToDouble(amount_str);
                 }
-                catch (FormatException)
+                catch (FormatException ex)
                 {
-                    Console.WriteLine("Format err");
+                    Console.WriteLine(amount_str);
+                    Console.WriteLine("Format err " + ex.ToString());
+                    Console.ReadLine();
+                    return;
                 }
-                catch (OverflowException)
+                catch (OverflowException ex)
                 {
-                    //Console.WriteLine("Over");
+                    Console.WriteLine("Over " + ex.ToString());
+                    Console.ReadLine();
                 }
+
+                //0е конверсии тоже не нужны
+                if (amount == 0)
+                    continue;
 
                 final_amount += amount;
 
                 while (get_end_of_cicle(buf_line))
                 {
                     //смотрим ближайший канал
-
                     sourse chanel = new sourse();
                     chanel.name = "";
                     chanel.count = 1;
                     chanel.amount = 0;
 
-                    //string chanel = "";
                     match = Regex.Match(buf_line, @"(.+?)(\/)");
                     if (match.Success)
                     {
-                        //Console.WriteLine(match.ToString());
                         chanel.name = match.ToString();
                         chanel.name = chanel.name.Substring(0, chanel.name.Length - 2);
-                        //Console.WriteLine(chanel);
+                    }
+                    else
+                    {
+                        Console.WriteLine("err finding chanel name");
+                        continue;
                     }
 
-                    //Console.WriteLine(sourses.Find((x) => x == chanel));
 
                     if (!chanel.name.Equals("(direct)"))
                     {
                         int index = sourses.FindIndex(x => x.name == chanel.name);
-                        //var foundIt = sourses.Find((x) => x.name == chanel.name);
-                        if (index >= 0)
+                         if (index >= 0)
                         {
                             //этот канал уже есть, поднимаем ему счетчик
                             sourses[index].count++;
@@ -189,48 +200,30 @@ namespace test_task
 
                 int koef = 0;
 
-                for (int i = 0; i < sourses.Count; i++)
+                foreach(sourse channel in sourses)
                 {
-                    koef += sourses[i].count;
+                    koef += channel.count;
                 }
 
                 double one_part = Math.Round(amount / koef, 2);
 
-                for (int i = 0; i < sourses.Count; i++)
+                foreach(sourse channel in sourses)
                 {
-                    sourses[i].amount += one_part * sourses[i].count;
+                    channel.amount += one_part * channel.count;
                 }
             }
 
             file.Close();
 
-            //File.WriteAllLines("output_JOPA.txt", "asdasd");
-
-            string[] outputStringMas = new string[sourses.Count+1];
-
-            double final_amount_test = 0;
-
             for(int i = 0; i < sourses.Count; i++)
             {
                 Console.Write(sourses[i].name + " ");
                 Console.WriteLine("{0:0.00}", sourses[i].amount);
-                outputStringMas[i] = sourses[i].name + ",";
-                final_amount_test += sourses[i].amount;
-                outputStringMas[i] += Math.Round(sourses[i].amount, 2);
             }
-
-            //outputStringMas[sourses.Count] = Convert.ToString(Math.Round(final_amount,2));
-
-            //File.WriteAllLines(output_file_name, outputStringMas);
 
             Console.WriteLine("{0:0.00}",final_amount);
 
             writeExcelFile(sourses);
-
-            //Console.WriteLine("{0:0.00}",final_amount_test);
-
-            //sourses.ForEach(Console.WriteLine);
-            //Console.WriteLine(buf_line);
 
             Console.ReadLine();
         }
