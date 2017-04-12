@@ -21,7 +21,6 @@ namespace test_task
     {
 
         const string input_file_name = "data.csv";
-        const string output_file_name = "output.csv";
 
         static bool get_end_of_cicle(string a)
         {
@@ -49,6 +48,25 @@ namespace test_task
             return false;
         }
 
+        static void writeExcelFile(List<sourse> sourses)
+        {
+            Excel excel_file = new Excel();
+            excel_file.NewDocument();
+            excel_file.SetValue("A1", "Источник");
+            excel_file.SetValue("B1", "Сумма");
+
+            int j = 2;
+
+            foreach(sourse channel in sourses)
+            {
+                excel_file.SetValue("A" + j, channel.name);
+                excel_file.SetValue("B" + j, Convert.ToString(channel.amount));
+                j++;
+            }
+
+            excel_file.CloseDocument();
+        }
+
         static void Main(string[] args)
         {
 
@@ -56,8 +74,6 @@ namespace test_task
             string buf_line = "";
 
             double final_amount = 0;
-
-            //List<string> sourses = new List<string> { };
 
             List<sourse> sourses = new List<sourse> { };
 
@@ -80,8 +96,6 @@ namespace test_task
                 line = file.ReadLine();
             }
 
-            //Console.WriteLine(line = file.ReadLine());
-
             while((line = file.ReadLine()) != null)
             {
                 for (int i = 0; i < sourses.Count; i++)
@@ -93,10 +107,12 @@ namespace test_task
 
                 buf_line = buf_line.Replace("\"", "");
 
+                var match = Regex.Match(buf_line, @"()");
+
                 //считываем сумму для этой строчки
                 //var match = Regex.Match(buf_line, @"[0-9][0-9]+(?:\.[0-9]*)?");
                 
-                var match = Regex.Match(buf_line, @"(?<=(\$)).*");
+                match = Regex.Match(buf_line, @"(?<=(\$)).*");
                 if (match.Success)
                 {
                     //Console.WriteLine(match.ToString());
@@ -104,6 +120,9 @@ namespace test_task
                 string amount_str = match.ToString();
                 //amount_str = amount_str.Replace(".", ",");
                 //amount_str = "1,5";
+
+                amount_str = amount_str.Replace(",", System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator);
+                amount_str = amount_str.Replace(".", System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
 
                 double amount = 0;
 
@@ -175,7 +194,7 @@ namespace test_task
                     koef += sourses[i].count;
                 }
 
-                double one_part = amount / koef;
+                double one_part = Math.Round(amount / koef, 2);
 
                 for (int i = 0; i < sourses.Count; i++)
                 {
@@ -202,26 +221,11 @@ namespace test_task
 
             //outputStringMas[sourses.Count] = Convert.ToString(Math.Round(final_amount,2));
 
-            File.WriteAllLines(output_file_name, outputStringMas);
+            //File.WriteAllLines(output_file_name, outputStringMas);
 
             Console.WriteLine("{0:0.00}",final_amount);
 
-            Excel excel_file = new Excel();
-            excel_file.NewDocument();
-            excel_file.SetValue("A1", "Источник");
-            excel_file.SetValue("B1", "Сумма");
-
-            int j = 2;
-
-            foreach(sourse channel in sourses)
-            {
-                excel_file.SetValue("A" + j, channel.name);
-                excel_file.SetValue("B" + j, Convert.ToString(channel.amount));
-                j++;
-            }
-
-            excel_file.SaveDocument("output_excel");
-            excel_file.CloseDocument();
+            writeExcelFile(sourses);
 
             //Console.WriteLine("{0:0.00}",final_amount_test);
 

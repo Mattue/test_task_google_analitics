@@ -62,12 +62,19 @@ namespace test_task
         //СОХРАНИТЬ ДОКУМЕНТ
         public void SaveDocument(string name)
         {
-            /*if (File.Exists(name))
-                WorkBook.GetType().InvokeMember("Save", BindingFlags.InvokeMethod, null,
-                    WorkBook, null);
-            else*/
-                WorkBook.GetType().InvokeMember("SaveAs", BindingFlags.InvokeMethod, null,
-                    WorkBook, new object[] { Path.Combine(Environment.CurrentDirectory, name) });
+                try
+                {
+                    if (File.Exists(name))
+                        WorkBook.GetType().InvokeMember("Save", BindingFlags.InvokeMethod, null,
+                            WorkBook, new object[] { Path.Combine(Environment.CurrentDirectory, name) });
+                    else
+                        WorkBook.GetType().InvokeMember("SaveAs", BindingFlags.InvokeMethod, null,
+                                WorkBook, new object[] { Path.Combine(Environment.CurrentDirectory, name) });
+                }
+                catch(TargetInvocationException ex)
+                {
+                    Console.WriteLine("Exception: " + ex.ToString());
+                }
         }
 
         // ЗАПИСАТЬ ЗНАЧЕНИЕ В ЯЧЕЙКУ
