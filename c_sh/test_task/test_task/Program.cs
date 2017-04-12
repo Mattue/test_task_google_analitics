@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 //using Excel;
 
@@ -24,6 +20,7 @@ namespace test_task
 
         static bool get_end_of_cicle(string a)
         {
+            //working while we can't get succesed convert from string to double
             try
             {
                 a = a.Remove(1, a.Length - 1);
@@ -81,7 +78,7 @@ namespace test_task
             }
             catch(FileNotFoundException)
             {
-                Console.WriteLine("File Not Found");
+                Console.WriteLine("File Not Found.");
                 Console.ReadLine();
                 return;
             }
@@ -94,7 +91,7 @@ namespace test_task
 
             while((line = file.ReadLine()) != null)
             {
-                //проверка на нужность этой строчки
+                //is line reletive
                 var match = Regex.Match(line, @"(display|cpm|banner)+|(cpc|ppc|paidsearch)+|(referral)+");
                 if (!match.Success)
                 {
@@ -110,7 +107,7 @@ namespace test_task
 
                 buf_line = buf_line.Replace("\\", "");
 
-                //считываем сумму для этой строчки
+                //reading amount in line
                 //var match = Regex.Match(buf_line, @"[0-9][0-9]+(?:\.[0-9]*)?");
                 string amount_str;
                 match = Regex.Match(buf_line, @"(?<=(\"")).*");
@@ -147,7 +144,7 @@ namespace test_task
                     Console.ReadLine();
                 }
 
-                //0е конверсии тоже не нужны
+                //we dont need zero conversions
                 if (amount == 0)
                     continue;
 
@@ -155,41 +152,41 @@ namespace test_task
 
                 while (get_end_of_cicle(buf_line))
                 {
-                    //смотрим ближайший канал
-                    sourse chanel = new sourse();
-                    chanel.name = "";
-                    chanel.count = 1;
-                    chanel.amount = 0;
+                    //looking for the closest channel
+                    sourse channel = new sourse();
+                    channel.name = "";
+                    channel.count = 1;
+                    channel.amount = 0;
 
                     match = Regex.Match(buf_line, @"(.+?)(\/)");
                     if (match.Success)
                     {
-                        chanel.name = match.ToString();
-                        chanel.name = chanel.name.Substring(0, chanel.name.Length - 2);
+                        channel.name = match.ToString();
+                        channel.name = channel.name.Substring(0, channel.name.Length - 2);
                     }
                     else
                     {
-                        Console.WriteLine("err finding chanel name");
+                        Console.WriteLine("err finding channel name");
                         continue;
                     }
 
 
-                    if (!chanel.name.Equals("(direct)"))
+                    if (!channel.name.Equals("(direct)"))
                     {
-                        int index = sourses.FindIndex(x => x.name == chanel.name);
+                        int index = sourses.FindIndex(x => x.name == channel.name);
                          if (index >= 0)
                         {
-                            //этот канал уже есть, поднимаем ему счетчик
+                            //channel already exists, raising count
                             sourses[index].count++;
                         }
                         else
                         {
-                            //канала нет, заводим его и поднимаем счетчик
-                            sourses.Add(chanel);
+                            //channel does not exists, create and raise count
+                            sourses.Add(channel);
                         }
                     }
 
-                    //удаление того, что мы уже посмотрели.
+                    //deleting what we already seen
                     match = Regex.Match(buf_line, @"(?<=((\s\>)|(\,))).*");
                     if (match.Success)
                     {
@@ -197,6 +194,8 @@ namespace test_task
                         buf_line = buf_line.Trim();
                     }
                 }
+
+                //calculating amount for each channel
 
                 int koef = 0;
 
@@ -229,41 +228,3 @@ namespace test_task
         }
     }
 }
-
-
-/*
-            //смотрим ближайший канал
-            string chanel = "";
-            match = Regex.Match(buf_line, @"(.+?)(\/)");
-            if (match.Success)
-            {
-                Console.WriteLine(match.ToString());
-                chanel = match.ToString();
-                chanel = chanel.Substring(0, chanel.Length - 2);
-                Console.WriteLine(chanel);
-            }
-
-            Console.WriteLine(sourses.Find((x) => x == chanel));
-            
-            if (sourses.Find((x) => x == chanel) != null)
-            {
-                Console.WriteLine("not null");
-                //этот канал уже есть, поднимаем ему счетчик
-            }
-            else
-            {
-                Console.WriteLine("null");
-                //канала нет, заводим его и поднимаем счетчик
-                sourses.Add(chanel);
-            }
-
-            //удаление того, что мы уже посмотрели.
-            match = Regex.Match(buf_line, @"(?<=\>).*");
-            if (match.Success)
-            {
-                Console.WriteLine(match.ToString());
-                buf_line = match.ToString();
-                buf_line = buf_line.Trim();
-                Console.WriteLine(buf_line);
-            }
- */
